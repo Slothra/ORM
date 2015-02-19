@@ -1,36 +1,49 @@
-#application
-
-
 class Application
 	def initialize
 		@arg1=''
 	end
 
-	def clear
-		@arg1 = ''
-	end
-
-	def get(string)
+	def self.get(string)
 		puts "Please enter the #{string}:"
 		STDIN.gets.chomp
 	end
 
-	def finder
+	def self.clear
+		@arg1=''
+	end
+
+	def self.finder
 		puts "Find by first name, surname, or id?"
 		input = STDIN.gets.chomp
 		case input
+		
 		when "first name"
 			input = get("first_name")
-			Contact.find_all_by_firstname(input)
+			if Contact.exists?(firstname: input)
+				puts Contact.where(firstname: input).order(:id) 
+			else
+				puts "None found"
+			end
+		
 		when "surname"
 			input = get("surname")
-			Contact.find_all_by_surname(input)
+			if Contact.exists?(surname: input) 
+				puts Contact.where(surname: input).order(:id) 
+			else 
+				puts "None found"
+			end
+		
 		when "id"
 			input = get("id").to_i
-			Contact.find(input)
+			if Contact.exists?(id: input) 
+				puts Contact.find(input)
+			else
+				puts "Error"
+			end
+		
 		else
 			puts "Error"
-			finder
+			Application.finder
 		end
 	end
 
@@ -48,40 +61,57 @@ class Application
 	def self.run
 		case @arg1
 		when "new"
-			clear
-			input1 = get("first_name")
-			input2 = get("surname")
-			input3 = get("email")
-			new_contact = Contact.new(input1,input2,input3)
-			if new_contact.check(input3)
+			Application.clear
+			new_contact = Contact.new
+			new_contact.firstname = get("first_name")
+			new_contact.surname = get("surname")
+			input = get("email")
+			if Contact.exists?(email: input) 
+				new_contact.email = input
 				new_contact.save
-				puts "Created"
+				puts new_contact
+				puts "Created" 
+			else 
+				puts "Email already taken"
 			end
+
 		when "find"
-			clear
-			finder
+			Application.clear
+			Application.finder
+
 		when "list"
-			clear
-			Contact.all
+			Application.clear
+			puts Contact.all.order(:id)
+
 		when "id" 
-			clear
+			Application.clear
 			input = get("id")
-			Contact.find(input)
+			if Contact.exists?(id: input) 
+				puts Contact.find(input)
+			else
+				puts "None found"
+			end
+
 		when "quit"
 			abort("Goodbye")
+
 		when "update"
-			clear
+			Application.clear
 			input = get("id")
-			updated_contact = Contact.extract(input)
+			updated_contact = Contact.find(input)
 			updated_contact.firstname = get("first_name")
 			updated_contact.surname = get("surname")
+			updated_contact.email = get("email")
 			updated_contact.save 
 			puts "Updated"
+
 		when "delete"
-			clear
-			input = get("id")
-			Contact.destroy(input)
+			Application.clear
+			input = get("id").to_i
+			contact = Contact.find(input)
+			contact.destroy
 			puts "Deleted"
+		
 		else
 			help_options
 			@arg1 = STDIN.gets.chomp
@@ -89,14 +119,4 @@ class Application
 		Application.run
 	end
 end
-
-#gets input runs what it can
-
-#new
-#list
-#find_by_surname
-#find_by_firstname
-#find_by_id
-#delete
-#when it has a file you can choose to update it
 
