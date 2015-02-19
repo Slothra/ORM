@@ -1,9 +1,4 @@
 #start
-
-require 'pry'
-require 'pg'
-require_relative 'contacts_class'
-# require_relative 'methods'
-require_relative 'application'
+require_relative 'setup'
 
 Application.run
